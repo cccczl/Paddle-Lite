@@ -82,7 +82,7 @@ class TargetType:
 
 # record op_info of valid kernels into `valid_ops` according to different target type
 with open(kernels_list_path) as f:
-    paths = set([path for path in f])
+    paths = set(list(f))
     for path in paths:
         with open(path.strip()) as g:
             c = g.read()
@@ -94,7 +94,7 @@ with open(kernels_list_path) as f:
                     valid_ops[index].append(k.op_type)
 # record op_info of valid kernels into `valid_ops` according to different target type
 with open(faked_kernels_list_path) as f:
-    paths = set([path for path in f])
+    paths = set(list(f))
     for path in paths:
         with open(path.strip()) as g:
             c = g.read()
@@ -112,7 +112,7 @@ for target in valid_targets:
 
 paths = set()
 with open(ops_list_path) as f:
-    paths = set([path for path in f])
+    paths = set(list(f))
     for path in paths:
         str_info = open(path.strip()).read()
         op_parser = RegisterLiteOpParser(str_info)
@@ -121,11 +121,11 @@ with open(ops_list_path) as f:
             if "_grad" in op:
                 continue
             out = '    {"%s", { "' % op
-            op_targets = []
-            for target in valid_targets:
-                if op in valid_ops[getattr(TargetType, target)]:
-                    op_targets.append(target)
-            if len(op_targets) > 0:
+            if op_targets := [
+                target
+                for target in valid_targets
+                if op in valid_ops[getattr(TargetType, target)]
+            ]:
                 out = out +'", "'.join(op_targets)+ '" }}'
             else:
                 # unknow type op:  kUnk = 0
@@ -134,15 +134,14 @@ with open(ops_list_path) as f:
             ops_lines.append(out)
 
 with open(kernel_op_map_dest_path, 'w') as f:
-    logging.info("write kernel list to %s" % kernel_op_map_dest_path)
+    logging.info(f"write kernel list to {kernel_op_map_dest_path}")
     f.write('\n'.join(out_lines))
     # write kernels into head file
     for target in valid_targets:
+        f.write("\n    // %s_OPS: " %target)
         if len(valid_ops[getattr(TargetType, target)]) == 0:
-            f.write("\n    // %s_OPS: " %target)
             f.write('\n    {},')
         else:
-            f.write("\n    // %s_OPS: " %target)
             f.write('\n    {"')
             f.write('","'.join(valid_ops[getattr(TargetType, target)]))
             f.write('"},\n')

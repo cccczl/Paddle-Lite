@@ -39,11 +39,11 @@ def sample_program_configs(draw):
                  "use_mkldnn": False,
                  })
 
-    program_config = ProgramConfig(
+    return ProgramConfig(
         ops=[transpose_op],
         weights={},
         inputs={
             "input_data": TensorConfig(shape=in_shape),
         },
-        outputs=["output_data"])
-    return program_config
+        outputs=["output_data"],
+    )

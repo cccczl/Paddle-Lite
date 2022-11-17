@@ -73,8 +73,8 @@ class OpConfig:
         self.outputs_dtype = outputs_dtype
         self.attrs = attrs
         if self.attrs is None:
-            self.attrs = dict()
-        self.attrs.update(kwargs)
+            self.attrs = {}
+        self.attrs |= kwargs
 
     def __repr__(self):
         log_str = self.type
@@ -106,17 +106,20 @@ class ProgramConfig:
         self.outputs = outputs
 
     def __repr__(self):
-        log_str = ''
-        for i in range(len(self.ops)):
-            if i != len(self.ops) - 1:
-                log_str += repr(self.ops[i]) + ' + '
-            else:
-                log_str += repr(self.ops[i])
-        log_str += ' -- '
+        log_str = (
+            ''.join(
+                f'{repr(self.ops[i])} + '
+                if i != len(self.ops) - 1
+                else repr(self.ops[i])
+                for i in range(len(self.ops))
+            )
+            + ' -- '
+        )
+
         for t, v in self.inputs.items():
-            log_str += '[' + t + ': ' + str(v) + ']'
+            log_str += f'[{t}: {str(v)}]'
         for t, v in self.weights.items():
-            log_str += '[' + t + ': ' + str(v) + ']'
+            log_str += f'[{t}: {str(v)}]'
 
         return log_str
 
@@ -435,15 +438,14 @@ class DataLayoutType(Enum):
 def Place(target_type:TargetType, precision_type: Optional[PrecisionType]=None, data_layout:Optional[DataLayoutType] = None):
     place = target_type.name
     if precision_type != None:
-        place = place+ "," + precision_type.name
+        place = f"{place},{precision_type.name}"
         if data_layout != None:
-            place = place + "," + data_layout.name
+            place = f"{place},{data_layout.name}"
     return place
 
 class CxxConfig:
     def __init__(self):
-        self.config = {}
-        self.config["discarded_passes"] = []
+        self.config = {"discarded_passes": []}
     def set_valid_places(self, places):
         self.config["valid_targets"] = places
     def set_threads(self, thread):

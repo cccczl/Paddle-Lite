@@ -32,11 +32,12 @@ def sample_program_configs(draw):
         outputs = {"Out": ["output_data"]},
         attrs = {})
     equal_op.outputs_dtype = {'output_data': np.uint8}
-    program_config = ProgramConfig(
+    return ProgramConfig(
         ops=[equal_op],
         weights={},
-        inputs={ "input_data_x": TensorConfig(shape=in_shape),
-                 "input_data_y": TensorConfig(shape=in_shape)
+        inputs={
+            "input_data_x": TensorConfig(shape=in_shape),
+            "input_data_y": TensorConfig(shape=in_shape),
         },
-        outputs=["output_data"])
-    return program_config
+        outputs=["output_data"],
+    )

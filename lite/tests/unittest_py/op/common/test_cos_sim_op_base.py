@@ -33,12 +33,12 @@ def sample_program_configs(draw):
                   "XNorm": ["output_xnorm"],
                   "YNorm": ["output_ynorm"]},
         attrs = {})
-    program_config = ProgramConfig(
+    return ProgramConfig(
         ops=[cos_sim_op],
         weights={},
         inputs={
             "input1": TensorConfig(shape=input_shape),
-            "input2": TensorConfig(shape=input_shape)
+            "input2": TensorConfig(shape=input_shape),
         },
-        outputs=["output", "output_xnorm", "output_ynorm"])
-    return program_config
+        outputs=["output", "output_xnorm", "output_ynorm"],
+    )

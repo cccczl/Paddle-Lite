@@ -52,10 +52,7 @@ def sample_program_configs(draw):
                 "fp32_values": fp32_values,
                 "int32_values": int32_values,
                 "int64_values": int64_values})
-    
-    program_config = ProgramConfig(
-        ops=[assign_value_op],
-        weights={},
-        inputs={},
-        outputs=["output_data"])
-    return program_config
+
+    return ProgramConfig(
+        ops=[assign_value_op], weights={}, inputs={}, outputs=["output_data"]
+    )

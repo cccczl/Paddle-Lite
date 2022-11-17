@@ -22,9 +22,7 @@ def get_pull(pull_id):
 
     github = Github(token, timeout=60)
     repo = github.get_repo('PaddlePaddle/Paddle-Lite')
-    pull = repo.get_pull(pull_id)
-
-    return pull
+    return repo.get_pull(pull_id)
 
 
 def get_files(args):
@@ -32,11 +30,10 @@ def get_files(args):
 
     :param args:
     """
-
     pull = get_pull(args.pull_id)
 
-    for file in pull.get_files():
-        print '/Paddle-Lite/{}'.format(file.filename)
+    for _ in pull.get_files():
+        for file in pull.get_files():
 
 
 def diff(args):
@@ -44,12 +41,11 @@ def diff(args):
 
     :param args:
     """
-
     pull = get_pull(args.pull_id)
 
-    for file in pull.get_files():
-        print '+++ {}'.format(file.filename)
-        print file.patch
+    for _ in pull.get_files():
+        for file in pull.get_files():
+        for file in pull.get_files():
 
 
 if __name__ == '__main__':

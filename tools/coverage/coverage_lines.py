@@ -59,7 +59,3 @@ if __name__ == '__main__':
             round(actual * 100, 1))
 
         exit(1)
-
-    print 'expected >= {} %, actual {} %, passed'.format(
-        round(expected * 100, 1),
-        round(actual * 100, 1))

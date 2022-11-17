@@ -42,16 +42,9 @@ def sample_program_configs(draw):
         attrs = {"x_num_col_dims": 1,
                     "y_num_col_dims": 1})
 
-    program_config = ProgramConfig(
+    return ProgramConfig(
         ops=[mul_op],
-        weights={
-            "input_data_y":
-             TensorConfig(shape=in_shape2)
-        },
-        inputs={
-            "input_data_x":
-            TensorConfig(shape=in_shape1)
-        },
-        outputs=["output_data"])
-
-    return program_config
+        weights={"input_data_y": TensorConfig(shape=in_shape2)},
+        inputs={"input_data_x": TensorConfig(shape=in_shape1)},
+        outputs=["output_data"],
+    )

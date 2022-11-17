@@ -31,11 +31,11 @@ def sample_program_configs(draw):
         inputs = {"X" : ["input_data"]},
         outputs = {"Out": ["output_data"]},
         attrs = {"threshold" : threshold_data})
-    program_config = ProgramConfig(
+    return ProgramConfig(
         ops=[thresholded_relu_op],
         weights={},
         inputs={
             "input_data": TensorConfig(shape=in_shape),
         },
-        outputs=["output_data"])
-    return program_config
+        outputs=["output_data"],
+    )

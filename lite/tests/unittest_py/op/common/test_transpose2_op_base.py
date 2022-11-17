@@ -38,11 +38,11 @@ def sample_program_configs(draw):
         attrs = {"axis": axis_int32_data,
                  "data_format": "AnyLayout",
                  "use_mkldnn": False,})
-    program_config = ProgramConfig(
+    return ProgramConfig(
         ops=[transpose2_op],
-        weights={"XShape_data" : TensorConfig(shape=[4])},
+        weights={"XShape_data": TensorConfig(shape=[4])},
         inputs={
             "input_data": TensorConfig(shape=in_shape),
         },
-        outputs=["output_data","XShape_data"])
-    return program_config
+        outputs=["output_data", "XShape_data"],
+    )

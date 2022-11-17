@@ -63,8 +63,7 @@ class AutoScanBaseTest(unittest.TestCase):
         super(AutoScanBaseTest, self).__init__(*args, **kwargs)
         self.ignore_cases = []
         abs_dir = os.path.abspath(os.path.dirname(__file__))
-        self.cache_dir = os.path.join(abs_dir,
-                                      str(self.__module__) + '_cache_dir')
+        self.cache_dir = os.path.join(abs_dir, f'{str(self.__module__)}_cache_dir')
         self.available_passes_in_framework = set()
         self.num_ran_programs = 0
         self.num_invalid_programs = 0
@@ -112,11 +111,12 @@ class AutoScanBaseTest(unittest.TestCase):
             if feed_data[name]['lod'] is not None:
                 input_tensor.set_lod(feed_data[name]['lod'])
         predictor.run()
-        result = {}
-        for out_name, o_name in zip(prog_config.outputs,
-                                    predictor.get_output_names()):
-            result[out_name] = predictor.get_output_handle(o_name).copy_to_cpu()
-        return result
+        return {
+            out_name: predictor.get_output_handle(o_name).copy_to_cpu()
+            for out_name, o_name in zip(
+                prog_config.outputs, predictor.get_output_names()
+            )
+        }
 
 
     @abc.abstractmethod
@@ -140,8 +140,8 @@ class AutoScanBaseTest(unittest.TestCase):
     def generate_op_config(self,
                            ops_config: List[Dict[str, Any]]) -> List[OpConfig]:
         ops = []
-        for i in range(len(ops_config)):
-            op_config = ops_config[i]
+        for item in ops_config:
+            op_config = item
             ops.append(
                 OpConfig(
                     type=op_config['op_type'],
@@ -152,15 +152,15 @@ class AutoScanBaseTest(unittest.TestCase):
 
     @abc.abstractmethod
     def ignore_log(self, msg: str):
-        logging.warning("SKIP: " + msg)
+        logging.warning(f"SKIP: {msg}")
 
     @abc.abstractmethod
     def fail_log(self, msg: str):
-        logging.error("FAILE: " + msg)
+        logging.error(f"FAILE: {msg}")
 
     @abc.abstractmethod
     def success_log(self, msg: str):
-        logging.info("SUCCESS: " + msg)
+        logging.info(f"SUCCESS: {msg}")
 
     @abc.abstractmethod
     def create_inference_config(self,
@@ -194,34 +194,33 @@ class AutoScanBaseTest(unittest.TestCase):
             if quant:
                 model, params = create_quant_model(model, params)
 
-            feed_data = {}
-            for name, tensor_config in prog_config.inputs.items():
-                feed_data[name] = {
-                    'data': tensor_config.data,
-                    'lod': tensor_config.lod
-                }
+            feed_data = {
+                name: {'data': tensor_config.data, 'lod': tensor_config.lod}
+                for name, tensor_config in prog_config.inputs.items()
+            }
+
             results: List[Dict[str, np.ndarray]] = []
 
             # baseline: cpu no ir_optim run
             base_config = self.create_inference_config(ir_optim=False)
-            logging.info('[ProgramConfig]: ' + str(prog_config))
+            logging.info(f'[ProgramConfig]: {str(prog_config)}')
             results.append(
                 self.run_test_config(model, params, prog_config, base_config,
                                      feed_data))
             for paddlelite_config, op_list, (
                     atol, rtol) in self.sample_predictor_configs():
                 self.num_predictor_kinds += 1
-                # ignore info
-                ignore_flag = False
                 pred_config = paddlelite_config.value()
+                ignore_flag = False
                 for ignore_info in self.ignore_cases:
                     if ignore_info[0](prog_config, pred_config):
                         ignore_flag = True
                         self.num_ignore_tests += 1
                         if ignore_info[1] == IgnoreReasonsBase.ACCURACY_ERROR:
-                            self.ignore_log("[ACCURACY_ERROR] " +
-                                          ignore_info[2] + ' ' + ' vs ' + self.
-                                          paddlelite_config_str(pred_config))
+                            self.ignore_log(
+                                f"[ACCURACY_ERROR] {ignore_info[2]}  vs {self.paddlelite_config_str(pred_config)}"
+                            )
+
                         else:
                             raise NotImplementedError
                         break
@@ -238,19 +237,18 @@ class AutoScanBaseTest(unittest.TestCase):
                         self.assert_op_list(opt_model_bytes, op_list)
                 except Exception as e:
                     self.fail_log(
-                        self.paddlelite_config_str(pred_config) +
-                        '\033[1;31m \nERROR INFO: {}\033[0m'.format(str(e)))
+                        f'{self.paddlelite_config_str(pred_config)}\033[1;31m \nERROR INFO: {str(e)}\033[0m'
+                    )
+
                     if not ignore_flag:
                         status = False
                     continue
-                self.success_log('PredictorConfig: ' + self.
-                                 paddlelite_config_str(pred_config))
+                self.success_log(f'PredictorConfig: {self.paddlelite_config_str(pred_config)}')
         self.assertTrue(status)
 
     def inference_config_str(self, config) -> bool:
-        dic = {}
         enable_mkldnn = config.mkldnn_enabled()
-        dic['use_mkldnn'] = enable_mkldnn
+        dic = {'use_mkldnn': enable_mkldnn}
         enable_gpu = config.use_gpu()
         return str(dic)
 
@@ -268,15 +266,16 @@ class AutoScanBaseTest(unittest.TestCase):
                 "In PassAutoScan you should give a valid pass name.")
         pg = paddle.static.deserialize_program(model_bytes)
         main_block = pg.desc.block(0)
-        after_op_list = list()
-        for i in range(main_block.op_size()):
-            if main_block.op(i).type() in ["feed", "fetch"]:
-                continue
-            after_op_list.append(main_block.op(i).type())
+        after_op_list = [
+            main_block.op(i).type()
+            for i in range(main_block.op_size())
+            if main_block.op(i).type() not in ["feed", "fetch"]
+        ]
+
         self.assertTrue(
             op_list_after_fusion == after_op_list,
-            "Expected operator list after fusion is {}, but now it's {}".format(
-                op_list_after_fusion, after_op_list), )
+            f"Expected operator list after fusion is {op_list_after_fusion}, but now it's {after_op_list}",
+        )
 
 
     def run_and_statis(

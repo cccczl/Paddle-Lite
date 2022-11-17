@@ -43,8 +43,7 @@ def parse_args():
         '--shuffle',
         action='store_true',
         help="Whether to shuffle train data.")
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 # For training test cost
 def train_test(executor, program, reader, feeder, fetch_list):
@@ -68,7 +67,7 @@ def main():
     else:
         train_reader = paddle.batch(
             paddle.dataset.uci_housing.train(), batch_size=args.batch_size)
-    
+
     # feature vector of length 13
     x = fluid.data(name='x', shape=[None, 13], dtype='float32')
     y = fluid.data(name='y', shape=[None, 1], dtype='float32')
@@ -113,8 +112,8 @@ def main():
         return
 
     train_prompt = "Train cost"
-    step = 0 
-    for pass_id in range(num_epochs):
+    step = 0
+    for _ in range(num_epochs):
         for data_train in train_reader():
             avg_loss_value, = exe.run(
                 main_program,

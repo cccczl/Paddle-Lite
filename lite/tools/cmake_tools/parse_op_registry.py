@@ -13,6 +13,7 @@
 # limitations under the License.
 ''' Collect op registry information. '''
 
+
 from __future__ import print_function
 import sys
 import logging
@@ -32,10 +33,7 @@ out_lines = [
     '',
 ]
 
-paths = set()
-for line in open(ops_list_path):
-    paths.add(line.strip())
-
+paths = {line.strip() for line in open(ops_list_path)}
 if tailored == "ON":
     minlines = set()
     with open(minops_list_path) as fd:
@@ -46,11 +44,11 @@ for path in paths:
     op_parser = RegisterLiteOpParser(str_info)
     ops = op_parser.parse(with_extra)
     for op in ops:
-        if tailored == "ON":
-            if op not in minlines: continue
-        out = "USE_LITE_OP(%s);" % op
+        if tailored == "ON" and op not in minlines:
+            continue
+        out = f"USE_LITE_OP({op});"
         out_lines.append(out)
 
 with open(dest_path, 'w') as f:
-    logging.info("write op list to %s" % dest_path)
+    logging.info(f"write op list to {dest_path}")
     f.write('\n'.join(out_lines))

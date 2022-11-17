@@ -32,14 +32,12 @@ def sample_program_configs(draw):
        inputs = {"X" : ["input_data_x"], "Y": ["input_data_y"]},
         outputs = {"Out": ["output_data"]},
         attrs = {"axis":axis})
-    program_config = ProgramConfig(
+    return ProgramConfig(
         ops=[not_equal_op],
         weights={},
         inputs={
-            "input_data_x":
-            TensorConfig(shape=in_shape_x),
-            "input_data_y":
-            TensorConfig(shape=in_shape_y)
+            "input_data_x": TensorConfig(shape=in_shape_x),
+            "input_data_y": TensorConfig(shape=in_shape_y),
         },
-        outputs=["output_data"])
-    return program_config
+        outputs=["output_data"],
+    )

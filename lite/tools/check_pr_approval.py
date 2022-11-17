@@ -32,10 +32,7 @@ def check_approval(count, required_reviewers):
             approved_user_ids.append(review["user"]["id"])
 
     # convert to int
-    required_reviewers_int = set()
-    for rr in required_reviewers:
-        required_reviewers_int.add(int(rr))
-
+    required_reviewers_int = {int(rr) for rr in required_reviewers}
     if len(set(approved_user_ids) & required_reviewers_int) >= count:
         print("TRUE")
     else:

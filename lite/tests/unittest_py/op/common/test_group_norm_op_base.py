@@ -33,25 +33,25 @@ def sample_program_configs(draw):
 
     def generate_input(*args, **kwargs):
         return np.random.random(in_shape).astype(np.float32)
+
     def generate_scale(*args, **kwargs):
         return np.random.random([in_shape[1]]).astype(np.float32) + 0.5
+
     def generate_bias(*args, **kwargs):
         return np.random.random([in_shape[1]]).astype(np.float32)
+
     def generate_attr(with_channel):
         attrs = {}
         if with_channel == True:
+            attrs = {"data_layout": "NCHW", "epsilon": 1e-05, "groups": int(group)}
+        else:
             attrs = {
-                "data_layout" : "NCHW",
-                "epsilon" : float(1e-5),
-                "groups" : int(group)
+                "data_layout": "NCHW",
+                "channels": in_shape[1],
+                "epsilon": 1e-05,
+                "groups": int(group),
             }
-        else :
-            attrs = {
-                "data_layout" : "NCHW",
-                "channels" : in_shape[1],
-                "epsilon" : float(1e-5),
-                "groups" : int(group)
-            }
+
         return attrs
 
     build_ops = OpConfig(

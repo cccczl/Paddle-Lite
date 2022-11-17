@@ -36,12 +36,9 @@ def sample_program_configs(draw):
         outputs = {"Out": ["Out_data"],
                   "Indices": ["Indices_data"]},
         attrs = {"k" : k_data})
-    program_config = ProgramConfig(
+    return ProgramConfig(
         ops=[top_k_op],
         weights={},
-        inputs={
-            "X_data": TensorConfig(shape=in_shape)
-        },
-        outputs= ["Out_data","Indices_data"])
-    
-    return program_config
+        inputs={"X_data": TensorConfig(shape=in_shape)},
+        outputs=["Out_data", "Indices_data"],
+    )

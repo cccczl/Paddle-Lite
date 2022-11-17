@@ -101,9 +101,8 @@ class Docstring(object):
     def _arg_with_type(self):
 
         for t in self.d['Args']:
-            m = re.search('([A-Za-z0-9_-]+)\s{0,4}(\(.+\))\s{0,4}:', t)
-            if m:
-                self.args[m.group(1)] = m.group(2)
+            if m := re.search('([A-Za-z0-9_-]+)\s{0,4}(\(.+\))\s{0,4}:', t):
+                self.args[m[1]] = m[2]
 
         return self.args
 
@@ -320,19 +319,18 @@ class DocstringChecker(BaseChecker):
         """
         if node.name.startswith("__") or node.name.startswith("_"):
             return True
-        args = []
-        for arg in node.args.get_children():
-            if (not isinstance(arg, astroid.AssignName)) \
-                or arg.name == "self":
-                continue
-            args.append(arg.name)
+        args = [
+            arg.name
+            for arg in node.args.get_children()
+            if isinstance(arg, astroid.AssignName) and arg.name != "self"
+        ]
 
         if len(args) <= 0:
             return True
 
         parsed_args = doc.args
         args_not_documented = set(args) - set(parsed_args)
-        if len(args) > 0 and len(parsed_args) <= 0:
+        if len(parsed_args) <= 0:
             self.add_message(
                 'W9003',
                 node=node,

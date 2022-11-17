@@ -27,10 +27,7 @@ from hypothesis import given, settings, seed, example, assume
 
 class TestBoxCoderOp(AutoScanTest):
     def is_program_valid(self, program_config: ProgramConfig) -> bool:
-        if len(program_config.ops[0].attrs["variance"]) > 0:
-            return False
-        else:
-            return True
+        return len(program_config.ops[0].attrs["variance"]) <= 0
 
     def sample_program_configs(self, draw):
         return test_box_coder_op_base.sample_program_configs(draw)

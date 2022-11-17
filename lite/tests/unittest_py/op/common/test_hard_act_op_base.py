@@ -43,7 +43,7 @@ def sample_program_configs(draw):
         else:
             attr = {"slope" : scale_data, "offset" : offset_data}
         return attr
-    
+
     build_ops = OpConfig(
         type = op_type_str,
         inputs = {

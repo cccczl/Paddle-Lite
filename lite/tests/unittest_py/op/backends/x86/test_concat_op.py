@@ -34,19 +34,16 @@ class TestConcatOp(AutoScanTest):
         axis = program_config.ops[0].attrs["axis"]
         if axis < 0 :
             axis += len1
-        
+
         if len1 != len2 :
             return False
-        for i in range(0, len1):
+        for i in range(len1):
             if i == axis:
                 continue
             if in_shape1[i] != in_shape2[i]:
                 return False
-        
-        if axis >=  len1:
-            return False
-        else:
-            return True
+
+        return axis < len1
 
     def sample_program_configs(self, draw):
         return test_concat_op_base.sample_program_configs(draw)

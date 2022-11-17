@@ -5,8 +5,7 @@ import re
 
 def merge_sort_two_list(la, lb):
     la.extend(lb)
-    la = list(set(la))
-    la.sort()
+    la = sorted(set(la))
     return la
 
 

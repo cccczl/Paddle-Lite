@@ -53,9 +53,8 @@ namespace lite {
         new_content = "\n".join(new_lines)
         return new_content
 
-    infile = open(opencl_kernel_path+"/cl_common.h", "r")
-    common_content = infile.read()
-    infile.close()
+    with open(f"{opencl_kernel_path}/cl_common.h", "r") as infile:
+        common_content = infile.read()
     common_content = clean_source(common_content)
 
     def get_header_raw(content):
@@ -67,6 +66,7 @@ namespace lite {
             new_lines.append(line)
         header = "\n".join(new_lines)
         return header
+
     common_header = get_header_raw(common_content)
 
     def get_header(content):
@@ -83,32 +83,30 @@ namespace lite {
         return header
 
 
-    filenames = os.listdir(opencl_kernel_path+"/buffer")
+    filenames = os.listdir(f"{opencl_kernel_path}/buffer")
     file_count = len(filenames)
 
     headers = {}
     funcs = {}
     for i in range(file_count):
         filename = filenames[i]
-        infile = open(opencl_kernel_path+"/buffer/" + filename, "r")
-        content = infile.read()
-        infile.close()
+        with open(f"{opencl_kernel_path}/buffer/{filename}", "r") as infile:
+            content = infile.read()
         content = clean_source(content)
         header = get_header(content)
-        headers["buffer/" + filename] = header
+        headers[f"buffer/{filename}"] = header
 
 
-    image_filenames = os.listdir(opencl_kernel_path+"/image")
+    image_filenames = os.listdir(f"{opencl_kernel_path}/image")
     image_file_count = len(image_filenames)
 
     for i in range(image_file_count):
         filename = image_filenames[i]
-        infile = open(opencl_kernel_path+"/image/" + filename, "r")
-        content = infile.read()
-        infile.close()
+        with open(f"{opencl_kernel_path}/image/{filename}", "r") as infile:
+            content = infile.read()
         content = clean_source(content)
         header = get_header(content)
-        headers["image/" + filename] = header
+        headers[f"image/{filename}"] = header
 
 
 
@@ -124,15 +122,15 @@ namespace lite {
             hexes.append(hex(ord(char)))
         core = "        {\"%s\", {" % file_name
         for item in hexes:
-            core += str(item) + ", "
+            core += f"{str(item)}, "
         core = core[: -2]
         core += "}}"
         if i != len(headers) - 1:
             core += ",\n"
         core1 += core
-    source = source % (core1)
+    source %= core1
     with open(opencl_dest_path, 'w') as f:
-        logging.info("write opencl kernels source files to %s" % opencl_dest_path)
+        logging.info(f"write opencl kernels source files to {opencl_dest_path}")
         f.write(source)
 
 def gen_empty_opencl_kernels():

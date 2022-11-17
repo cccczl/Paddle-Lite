@@ -21,9 +21,7 @@ def get_pull(pull_id):
 
     github = Github(token, timeout=60)
     repo = github.get_repo('PaddlePaddle/Paddle-Lite')
-    pull = repo.get_pull(pull_id)
-
-    return pull
+    return repo.get_pull(pull_id)
 
 
 def get_files(pull_id):
@@ -45,10 +43,7 @@ def clean(pull_id):
     :return:
     """
 
-    changed = []
-
-    for file in get_files(pull_id):
-        changed.append('/Paddle-Lite/build/{}.gcda'.format(file))
+    changed = [f'/Paddle-Lite/build/{file}.gcda' for file in get_files(pull_id)]
 
     for parent, dirs, files in os.walk('/Paddle-Lite/build/'):
         for gcda in files:

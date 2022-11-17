@@ -45,12 +45,12 @@ def sample_program_configs(draw):
                  "stride2" : stride2,
                  "corr_type_multiply" : corr_type_multiply})
 
-    program_config = ProgramConfig(
+    return ProgramConfig(
         ops=[correlation_op],
         weights={},
         inputs={
             "input1": TensorConfig(shape=input1_shape),
             "input2": TensorConfig(shape=input2_shape),
         },
-        outputs=["output"])
-    return program_config
+        outputs=["output"],
+    )
