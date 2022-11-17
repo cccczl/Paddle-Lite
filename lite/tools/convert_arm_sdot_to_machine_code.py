@@ -30,16 +30,20 @@ def compute_sdot_vec_elem(vd, vn, vm, idx):
                vd=vd, vn=vn, vm=vm, idx=idx)
 
 def match_sdot_patten(line):
-    matched = re.search(r'sdot\s+v(.*?).4s\s*,\s*v(.*?).16b\s*,\s*v(.*?).4b\[(.*?)\].*', line, re.M|re.I)
-    if matched:
-        # print('matched:', matched.group(1), matched.group(2), matched.group(3), matched.group(4))
-        vd = int(matched.group(1))
-        vn = int(matched.group(2))
-        vm = int(matched.group(3))
-        idx = int(matched.group(4))
-        return compute_sdot_vec_elem(vd, vn, vm, idx)
-    else:
+    if not (
+        matched := re.search(
+            r'sdot\s+v(.*?).4s\s*,\s*v(.*?).16b\s*,\s*v(.*?).4b\[(.*?)\].*',
+            line,
+            re.M | re.I,
+        )
+    ):
         return line
+        # print('matched:', matched.group(1), matched.group(2), matched.group(3), matched.group(4))
+    vd = int(matched[1])
+    vn = int(matched[2])
+    vm = int(matched[3])
+    idx = int(matched[4])
+    return compute_sdot_vec_elem(vd, vn, vm, idx)
 
 def parser_file(file_in, file_out):
     out = open(file_out, 'w')
@@ -49,7 +53,7 @@ def parser_file(file_in, file_out):
             # print(new_line)
             out.write(new_line)
     else:
-        print('input file {} not exist'.format(file_in))
+        print(f'input file {file_in} not exist')
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser('convert arm sdot to machine code')

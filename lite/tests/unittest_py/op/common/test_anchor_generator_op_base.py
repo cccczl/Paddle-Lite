@@ -40,12 +40,9 @@ def sample_program_configs(draw):
                 "stride": stride,
                 "variances": variances,
                 })
-    program_config = ProgramConfig(
+    return ProgramConfig(
         ops=[anchor_generator_op],
         weights={},
-        inputs={
-            "input_data":
-            TensorConfig(shape=in_shape)
-        },
-        outputs=["anchors_data", "variance_data"])
-    return program_config
+        inputs={"input_data": TensorConfig(shape=in_shape)},
+        outputs=["anchors_data", "variance_data"],
+    )

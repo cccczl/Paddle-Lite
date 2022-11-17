@@ -98,17 +98,13 @@ const std::map<std::string, std::string> kernel2path_map{
 
 def parse_fake_kernels_from_path(list_path):
     with open(list_path) as f:
-        paths = set([path for path in f])
+        paths = set(list(f))
         for path in paths:
             with open(path.strip()) as g:
                 c = g.read()
                 kernel_parser = RegisterLiteKernelParser(c)
                 kernel_parser.parse("ON", "ON")
                 for k in kernel_parser.kernels:
-                    out_src_lines = [
-                        '#include "all_kernel_faked.h"',
-                    ]
-                    out_src_lines.append("")
                     kernel_name = "{op_type}_{target}_{precision}_{data_layout}_{alias}_class".format(
                         op_type=k.op_type,
                         target=k.target,
@@ -131,17 +127,10 @@ def parse_fake_kernels_from_path(list_path):
                     out_hdr_lines.append("")
 
 
-                    key = "REGISTER_LITE_KERNEL(%s, %s, %s, %s, %s, %s)" % (
-                        k.op_type,
-                        k.target,
-                        k.precision,
-                        k.data_layout,
-                        '::paddle::lite::' + kernel_name,
-                        k.alias
-                    )
-                    out_lines.append(key)
-                    out_src_lines.append(key)
+                    key = f"REGISTER_LITE_KERNEL({k.op_type}, {k.target}, {k.precision}, {k.data_layout}, ::paddle::lite::{kernel_name}, {k.alias})"
 
+                    out_lines.append(key)
+                    out_src_lines = ['#include "all_kernel_faked.h"', "", key]
                     for input in k.inputs:
                         io = '    .BindInput("%s", {%s})' % (input.name, input.type)
                         out_lines.append(io)
@@ -156,14 +145,13 @@ def parse_fake_kernels_from_path(list_path):
                         out_src_lines.append(io)
                     out_lines.append("    .Finalize();")
                     out_lines.append("")
-                    out_src_lines.append("    .Finalize();")
-                    out_src_lines.append("")
-                    with open(os.path.join(src_dest_path, '%s.cc' %(kernel_name)), 'w') as file:
+                    out_src_lines.extend(("    .Finalize();", ""))
+                    with open(os.path.join(src_dest_path, f'{kernel_name}.cc'), 'w') as file:
                         file.write('\n'.join(out_src_lines))
 
 def parse_sppported_kernels_from_path(list_path):
     with open(list_path) as f:
-        paths = set([path for path in f])
+        paths = set(list(f))
         for path in paths:
             with open(path.strip()) as g:
                 c = g.read()
@@ -189,15 +177,15 @@ parse_sppported_kernels_from_path(faked_kernels_list_path)
 parse_sppported_kernels_from_path(kernels_list_path)
 
 with open(hdr_dest_path, 'w') as f1:
-    logging.info("write kernel list to %s" % hdr_dest_path)
+    logging.info(f"write kernel list to {hdr_dest_path}")
     f1.write('\n'.join(out_hdr_lines))
 
 with open(dest_path, 'w') as f2:
-    logging.info("write kernel list to %s" % dest_path)
+    logging.info(f"write kernel list to {dest_path}")
     f2.write('\n'.join(out_lines))
 
 with open(kernelmap_path, 'w') as fd:
-    logging.info("write kernel map to %s" % kernelmap_path)
+    logging.info(f"write kernel map to {kernelmap_path}")
     kernel_src_map_lines.append('  {"  ", "  "}')
     kernel_src_map_lines.append('};')
     fd.write('\n'.join(kernel_src_map_lines))

@@ -30,7 +30,7 @@ def sample_program_configs(draw):
         update_shape = []
         for i in range(len(index_shape) - 1):
             update_shape.append(index_shape[i])
-        for i in range(index_shape[-1], len(ref_shape), 1):
+        for i in range(index_shape[-1], len(ref_shape)):
             update_shape.append(ref_shape[i])
         return update_shape
 

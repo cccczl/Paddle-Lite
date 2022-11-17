@@ -58,7 +58,7 @@ def get_info_file_lines(info_file, diff_file):
 
     diff_file_lines = get_diff_file_lines(diff_file)
     print diff_file_lines
-    
+
     current_lines = []
     current_lf = 0
     current_lh = 0

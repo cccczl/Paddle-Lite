@@ -28,70 +28,75 @@ IgnoreReasons = IgnoreReasonsBase
 def ParsePlaceInfo(place_str):
    # todo: this func should be completed later
    infos = ''.join(place_str.split()).split(",")
-   if len(infos) == 1 :
-       if infos[0] in TargetType.__members__:
-           return Place(eval("TargetType." + infos[0]))
-       else:
-           logging.error("Error place info: " + place_str)
-   elif len(infos) == 2 :
-       if (infos[0] in TargetType.__members__) and (infos[1] in PrecisionType.__members__):
-           return Place(eval("TargetType." + infos[0]), eval("PrecisionType." +  infos[1]))
-       else:
-           logging.error("Error place info: " + place_str)
-   elif len(infos) == 3 :
-       if (infos[0] in TargetType.__members__) and (infos[1] in PrecisionType.__members__) and (infos[2] in DataLayoutType.__members__):
-           return Place(eval("TargetType." + infos[0]), eval("PrecisionType." +  infos[1]), eval("DataLayoutType." + infos[2]))
-       else:
-           logging.error("Error place info: " + place_str)
+   if len(infos) == 1:
+      if infos[0] in TargetType.__members__:
+         return Place(eval(f"TargetType.{infos[0]}"))
+      else:
+         logging.error(f"Error place info: {place_str}")
+   elif len(infos) == 2:
+      if (infos[0] in TargetType.__members__) and (infos[1] in PrecisionType.__members__):
+         return Place(eval(f"TargetType.{infos[0]}"), eval(f"PrecisionType.{infos[1]}"))
+      else:
+         logging.error(f"Error place info: {place_str}")
+   elif len(infos) == 3:
+      if (infos[0] in TargetType.__members__) and (infos[1] in PrecisionType.__members__) and (infos[2] in DataLayoutType.__members__):
+         return Place(
+             eval(f"TargetType.{infos[0]}"),
+             eval(f"PrecisionType.{infos[1]}"),
+             eval(f"DataLayoutType.{infos[2]}"),
+         )
+      else:
+         logging.error(f"Error place info: {place_str}")
    else:
-       logging.error("Error place info: " + place_str)
+      logging.error(f"Error place info: {place_str}")
 
 def ParsePaddleLiteConfig(self, config):
-    lite_config = CxxConfig()
-    if "valid_targets" in config:
-        valid_places = []
-        for place_str in config["valid_targets"]:
-            valid_places.append(ParsePlaceInfo(place_str))
-        lite_config.set_valid_places(valid_places)
-    if "thread" in config:
-        lite_config.set_thread(pred_config["thread"])
-    if "discarded_passes" in config:
-        for discarded_pass in config["discarded_passes"]:
-            lite_config.add_discarded_pass(discarded_pass)
-    return lite_config
+   lite_config = CxxConfig()
+   if "valid_targets" in config:
+      valid_places = [
+          ParsePlaceInfo(place_str) for place_str in config["valid_targets"]
+      ]
+      lite_config.set_valid_places(valid_places)
+   if "thread" in config:
+       lite_config.set_thread(pred_config["thread"])
+   if "discarded_passes" in config:
+       for discarded_pass in config["discarded_passes"]:
+           lite_config.add_discarded_pass(discarded_pass)
+   return lite_config
 
 class AutoScanTest(AutoScanBaseTest):
     def run_lite_config(self, model, params, inputs, pred_config) -> Dict[str, np.ndarray]:
         # 1. store original model
-        with open(self.cache_dir + "/model", "wb") as f:
-            f.write(model)
-        with open(self.cache_dir + "/params", "wb") as f:
-            f.write(params)
+       with open(f"{self.cache_dir}/model", "wb") as f:
+          f.write(model)
+       with open(f"{self.cache_dir}/params", "wb") as f:
+          f.write(params)
 
-        # 2. run inference
-        config = ParsePaddleLiteConfig(self, pred_config)
-        config.set_model_buffer(model, len(model), params, len(params))
-        predictor = create_paddle_predictor(config)
+       # 2. run inference
+       config = ParsePaddleLiteConfig(self, pred_config)
+       config.set_model_buffer(model, len(model), params, len(params))
+       predictor = create_paddle_predictor(config)
 
-        for name in inputs:
-            input_tensor = predictor.get_input_by_name(name)
-            input_tensor.from_numpy(inputs[name]['data'])
-            if inputs[name]['lod'] is not None:
-                input_tensor.set_lod(inputs[name]['lod'])
-        predictor.run()
+       for name in inputs:
+           input_tensor = predictor.get_input_by_name(name)
+           input_tensor.from_numpy(inputs[name]['data'])
+           if inputs[name]['lod'] is not None:
+               input_tensor.set_lod(inputs[name]['lod'])
+       predictor.run()
 
         # 3. inference results
-        result = {}
-        for out_name in predictor.get_output_names():
-            result[out_name] = predictor.get_output_by_name(out_name).numpy()
-        result_res = copy.deepcopy(result)
+       result = {
+           out_name: predictor.get_output_by_name(out_name).numpy()
+           for out_name in predictor.get_output_names()
+       }
+       result_res = copy.deepcopy(result)
 
         # 4. optimized model
-        predictor.save_optimized_pb_model(self.cache_dir+ "/opt_model/")
-        with open(self.cache_dir + "/opt_model/model", "rb") as f:
-            model = f.read()
+       predictor.save_optimized_pb_model(f"{self.cache_dir}/opt_model/")
+       with open(f"{self.cache_dir}/opt_model/model", "rb") as f:
+          model = f.read()
 
-        return result_res, model
+       return result_res, model
 
 
 class FusePassAutoScanTest(AutoScanTest):

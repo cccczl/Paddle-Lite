@@ -42,11 +42,11 @@ def sample_program_configs(draw):
         outputs = {"Y": output_string},
         attrs = {"axis": axis_data,
                  "num": num_data})
-    program_config = ProgramConfig(
+    return ProgramConfig(
         ops=[unstack_op],
         weights={},
         inputs={
             "input_data": TensorConfig(shape=in_shape),
         },
-        outputs= output_string)
-    return program_config
+        outputs=output_string,
+    )

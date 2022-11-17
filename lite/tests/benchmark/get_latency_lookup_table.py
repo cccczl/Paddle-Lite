@@ -39,8 +39,7 @@ def get_args():
         help='Running times of op when estimating latency.')
     parser.add_argument('--arm_v7_v8', type=str, default='armv8',
         help='Indicate arm architecture v7 or v8.')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 def check_dev_connect():
     cmd = 'adb devices | grep device'
@@ -67,39 +66,18 @@ def get_dev_info():
         out = v.strip('CPU part').strip().strip(':').strip()
         if out == '0xd03':
             arch_type[i] = 'ARM_A53'
-        elif out == '0xd05':
+        elif out in ['0xd05', '0x805', '0x803']:
             arch_type[i] = 'ARM_A55'
         elif out == '0xd07':
             arch_type[i] = 'ARM_A57'
-        elif out == '0xd08':
+        elif out in ['0xd08', '0x205']:
             arch_type[i] = 'ARM_A72'
-        elif out == '0xd09':
+        elif out in ['0xd09', '0x801', '0x800']:
             arch_type[i] = 'ARM_A73'
-        elif out == '0xd0a':
+        elif out in ['0xd0a', '0x802']:
             arch_type[i] = 'ARM_A75'
-        elif out == '0xd40':
+        elif out in ['0xd40', '0x804']:
             arch_type[i] = 'ARM_A76'
-        elif out == '0x804':
-            # 855
-            arch_type[i] = 'ARM_A76'
-        elif out == '0x805':
-            # 855
-            arch_type[i] = 'ARM_A55'
-        elif out == '0x802':
-            # 845
-            arch_type[i] = 'ARM_A75'
-        elif out == '0x803':
-            # 845
-            arch_type[i] = 'ARM_A55'
-        elif out == '0x801':
-            # 835
-            arch_type[i] = 'ARM_A73'
-        elif out == '0x800':
-            # 835
-            arch_type[i] = 'ARM_A73'
-        elif out == '0x205':
-            # 820
-            arch_type[i] = 'ARM_A72'
         else:
             arch_type[i] = 'UNKNOWN CPU ARCH'
     return dev_info, core_num, arch_type

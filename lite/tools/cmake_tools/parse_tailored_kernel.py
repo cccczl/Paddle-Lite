@@ -41,9 +41,11 @@ def main(argv):
     first_flag = argv[8]
     file_path = os.path.realpath(__file__)
     target = device_target[1:].lower()
-    src_kernel_path = os.path.dirname(file_path) + "/../../kernels/" + target + "/" +  src_kernel_file
+    src_kernel_path = f"{os.path.dirname(file_path)}/../../kernels/{target}/{src_kernel_file}"
+
     if target == "metal":
-        src_kernel_path = os.path.dirname(file_path) + "/../../kernels/" + target + "/image_op/" +  src_kernel_file
+        src_kernel_path = f"{os.path.dirname(file_path)}/../../kernels/{target}/image_op/{src_kernel_file}"
+
     parse_tailored_kernel_from_file(src_kernel_path, dst_kernel_path, op_name, device_target, data_type, layout_type, alias_name, first_flag)
 
 if __name__ == '__main__':

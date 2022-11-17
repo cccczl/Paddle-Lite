@@ -42,9 +42,9 @@ def sample_program_configs(draw):
                  "force_cpu" : False,
                  "input_dim_idx" : input_dim_idx,
                  "output_dim_idx" : out_dim_idx})
-    program_config = ProgramConfig(
+    return ProgramConfig(
         ops=[fill_constant_batch_size_like_op],
         weights={},
-        inputs={"input_data" : TensorConfig(shape=in_shape)},
-        outputs=["output_data"])
-    return program_config
+        inputs={"input_data": TensorConfig(shape=in_shape)},
+        outputs=["output_data"],
+    )

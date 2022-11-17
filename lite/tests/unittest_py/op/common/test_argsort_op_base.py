@@ -35,12 +35,9 @@ def sample_program_configs(draw):
         outputs = {"Out": ["output_data"],
                   "Indices": ["indices_data"]},
         attrs = {"axis": axis})
-    program_config = ProgramConfig(
+    return ProgramConfig(
         ops=[arg_sort_op],
         weights={},
-        inputs={
-            "input_data":
-            TensorConfig(shape=in_shape)
-        },
-        outputs=["output_data"])
-    return program_config
+        inputs={"input_data": TensorConfig(shape=in_shape)},
+        outputs=["output_data"],
+    )

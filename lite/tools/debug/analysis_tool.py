@@ -153,8 +153,8 @@ class FluidModelExecutor(object):
         """
         Draw graph with graphviz
         """
-        dot_path = os.path.join([output_path, filename + '.dot'])
-        pdf_path = os.path.join([output_path, filename + '.pdf'])
+        dot_path = os.path.join([output_path, f'{filename}.dot'])
+        pdf_path = os.path.join([output_path, f'{filename}.pdf'])
         debugger.draw_block_graphviz(self.program.global_block(), path=dot_path)
         cmd = ["dot", "-Tpdf", dot_path, "-o", pdf_path]
         subprocess.Popen(
@@ -164,7 +164,7 @@ class FluidModelExecutor(object):
             stderr=subprocess.PIPE)
 
     def _prepare_feed_data(self, block, feed_target_names):
-        feed_dict = dict()
+        feed_dict = {}
 
         def fill_data(np_dtype, col, shape):
             if self.input_data:
@@ -203,9 +203,8 @@ class FluidModelExecutor(object):
         input_data = []
         if not input_file:
             return input_data
-        logger.info("Loading input file %s ..." % input_file)
-        for line in load_file(input_file, "\t"):
-            input_data.append(line)
+        logger.info(f"Loading input file {input_file} ...")
+        input_data.extend(iter(load_file(input_file, "\t")))
         return input_data
 
     def _load_inference_model(self):
@@ -221,7 +220,7 @@ class FluidModelExecutor(object):
 
     def _fetch_tmp_vars(self, block, var_names_list=None):
         fetch_var = block.var('fetch')
-        old_fetch_names = set([var.name for var in self.fetch_targets])
+        old_fetch_names = {var.name for var in self.fetch_targets}
         new_fetch_vars = [block.var(name) for name in old_fetch_names]
         i = len(new_fetch_vars)
         if var_names_list is None:
@@ -245,7 +244,7 @@ class FluidModelExecutor(object):
                      save_path='',
                      out_data_len=10):
         res = OrderedDict()
-        old_fetch_names = set([var.name for var in self.fetch_targets])
+        old_fetch_names = {var.name for var in self.fetch_targets}
         if need_save:
             out_fd = open(save_path, 'w')
         for result in results:
@@ -276,7 +275,7 @@ class Analyser(object):
         self.tensors = OrderedDict()
         self.topo = {}
         self.input = []
-        logger.info("Loading fluid inference model %s ..." % args.model_dir)
+        logger.info(f"Loading fluid inference model {args.model_dir} ...")
         self.predictor = FluidModelExecutor(args.model_dir, args.input_file)
 
     def analysis(self):
@@ -303,7 +302,7 @@ class Analyser(object):
     def _load_topo_file(self):
         if self.args.topo_file == "":
             raise ValueError("Topo file path in empty")
-        logger.info("Loading topo file %s ..." % self.args.topo_file)
+        logger.info(f"Loading topo file {self.args.topo_file} ...")
         for line in load_file(self.args.topo_file, '\t'):
             op_type, inputs, outputs = line
             for name in self._parse_topo_field(outputs):
@@ -314,7 +313,7 @@ class Analyser(object):
     def _load_tensor_file(self):
         if self.args.tensor_file == "":
             raise ValueError("Tensor file path in empty")
-        logger.info("Loading tensor file %s ..." % args.tensor_file)
+        logger.info(f"Loading tensor file {args.tensor_file} ...")
         for line in load_file(args.tensor_file, "\t"):
             name, dim, values = line
             dim = map(int, dim[1:-1].split(','))
@@ -323,7 +322,7 @@ class Analyser(object):
             dim_size = reduce(mul, dim)
             value_size = len(values)
             assert dim_size == value_size, \
-                        "Dim size mismatch with data: %d vs %d" % (dim_size, value_size)
+                            "Dim size mismatch with data: %d vs %d" % (dim_size, value_size)
 
             self.tensors[name] = {"dim": dim, "values": values}
 
@@ -333,12 +332,12 @@ class Analyser(object):
               so we can find the first ops (may be one of them) with error results
         """
         assert len(self.tensors) == len(results), \
-                "FLuid output tensor'size mismatch with `tensor_file`"
+                    "FLuid output tensor'size mismatch with `tensor_file`"
         diff_vars = []
         flag = False
         for k in self.tensors:
             if k not in results:
-                raise KeyError("Have not found infer result for `%s`" % k)
+                raise KeyError(f"Have not found infer result for `{k}`")
             if len(self.tensors[k]['values']) != len(results[k]['values']):
                 raise ValueError(
                     "Argname: %s size mismatch with `tensor_file`: %d vs %d" %
@@ -384,7 +383,7 @@ class Analyser(object):
                 for idx, (op_type, inputs,
                           outputs) in enumerate(self.topo[var]):
                     op_repr = '\t'.join([op_type, inputs, outputs])
-                    logger.info("dump diff info: ------------ %s" % op_repr)
+                    logger.info(f"dump diff info: ------------ {op_repr}")
                     fd.write(op_repr + '\n')
                     fd.write(
                         "--------------- Tensor File info ---------------\n")

@@ -41,11 +41,11 @@ def sample_program_configs(draw):
                 "flatten": flatten,
                 "exclusive": exclusive,
                 "reverse": reverse})
-    program_config = ProgramConfig(
+    return ProgramConfig(
         ops=[cumsum_op],
         weights={},
         inputs={
             "input_data_x": TensorConfig(shape=input_data_x_shape),
         },
-        outputs=["output_data"])
-    return program_config
+        outputs=["output_data"],
+    )
